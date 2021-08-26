@@ -23,7 +23,7 @@ from TrafficSignsDataset import TrafficSignsDataset
 class Logger(object):
     def __init__(self, dataset):
         self.terminal = sys.stdout
-        self.log = open('./YOLO_traffic' + dataset + '_log_' +
+        self.log = open('./YOLO_traffic_log_' +
                         str(date.today()) + '.txt', 'a')
 
     def write(self, message):
@@ -44,7 +44,7 @@ def crt_dir(save_dir, image_save_dir):
 def YOLO_traffic(dataset):
     sys.stdout = Logger(dataset)
 
-    if torch.cuda.is_availble():
+    if torch.cuda.is_available():
         # torch.device代表将torch.Tensor分配到的设备的对象。
         # torch.device包含一个设备类型（‘cpu’或‘cuda’）和可选的设备序号。
         device = torch.device('cuda')
@@ -90,6 +90,7 @@ def YOLO_traffic(dataset):
         # 开始计时，记录epoch的开始时间
         epoch_start_time = time.time()
 
+        # FIXME: 没有转换成tensor，还是PIL.Image.Image
         for (data, labels) in tqdm(train_loader):
             data, labels = data.to(device), labels.to(device)
             optimizer.zero_grad()
@@ -126,5 +127,11 @@ def YOLO_traffic(dataset):
 
 
 if __name__ == '__main__':
-    traffic_dataset = TrafficSignsDataset()
+    transform = transforms.Compose(
+        [transforms.ToTensor(), transforms.Normalize(mean=(0.5,), std=(0.5,))])
+
+    # FIXME: 什么是Target Transform ?????
+    traffic_dataset = TrafficSignsDataset(
+        'GroundTruth.txt', transform=transform)
+
     YOLO_traffic(traffic_dataset)

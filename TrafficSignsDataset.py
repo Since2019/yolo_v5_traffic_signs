@@ -25,25 +25,25 @@ class TrafficSignsDataset(Dataset):  # 继承Dataset类
             # X-CENTER Y-CENTER WIDTH HEIGHT
             # # Width & Height  是半径
             # https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data
-            imgs.append((words[0], words[1], words[2], words[3]))  # 存放进imgs列表中
+            imgs.append((words[0], words[1], words[2],
+                         words[3], words[4], words[5]))  # 存放进imgs列表中
 
         self.imgs = imgs        # 最主要就是要生成这个list， 然后DataLoader中给index，通过getitem读取图片数据
         self.transform = transform
         self.target_transform = target_transform
 
     def __getitem__(self, index):
-        fn, label = self.imgs[index]  # fn代表图片的路径，label代表标签
+        print('self.imgs[index]')
+        print(self.imgs[index])
+        # fn代表图片的路径，label代表标签
+        filename, x_center, y_center, roi_width, roi_height, label = self.imgs[index]
         # 像素值 0~255，在transfrom.totensor会除以255，使像素值变成 0~1   参考：https://blog.csdn.net/icamera0/article/details/50843172
-        img = Image.open(fn).convert('RGB')
+        img = Image.open(filename).convert('RGB')
 
         if self.transform is not None:
             img = self.transform(img)   # 在这里做transform，转为tensor等等
 
-        return img, label
+        return img, x_center, y_center, roi_width, roi_height, label
 
     def __len__(self):
         return len(self.imgs)   # 返回图片的长度
-
-
-def main():
-    my_dataset = MyDataset()
